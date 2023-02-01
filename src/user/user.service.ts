@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './user.interface';
-import { EMPTY, from, Observable, ObservedValueOf, of } from 'rxjs';
+import { from, Observable, ObservedValueOf, of } from 'rxjs';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
@@ -25,6 +25,6 @@ export class UserService {
     if (found) {
       return of(found);
     }
-    return EMPTY;
+    throw new NotFoundException(`User with ${id} not found!`);
   }
 }
