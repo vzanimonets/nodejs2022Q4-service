@@ -1,20 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { User } from './user.interface';
 import { from, Observable, ObservedValueOf, of } from 'rxjs';
+import { CreateUserDto } from './dto/create-user.dto';
 import { v4 as uuid } from 'uuid';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [
-    {
-      id: uuid(), // uuid v4
-      login: 'd',
-      password: '',
-      version: 1, // integer number, increments on update
-      createdAt: new Date().getMilliseconds(), // timestamp of creation
-      updatedAt: new Date().getMilliseconds(), // timestamp of last upda
-    },
-  ];
+  private users: User[] = [];
 
   findAll(): Observable<ObservedValueOf<User[]>> {
     return from(this.users);
@@ -26,5 +18,25 @@ export class UserService {
       return of(found);
     }
     throw new NotFoundException(`User with ${id} not found!`);
+  }
+
+  //TODO: refactor validation
+  async createUser(dto: CreateUserDto): Promise<void> {
+    const { login, password } = dto;
+    const user = this.users.find((user) => user.login === login);
+    const currentDate = Date.now();
+    const newUser: User = {
+      id: uuid(),
+      login,
+      password,
+      version: 1,
+      createdAt: currentDate,
+      updatedAt: currentDate,
+    };
+    await this.addUser(newUser);
+  }
+
+  async addUser(user: User): Promise<void> {
+    this.users.push(user);
   }
 }
