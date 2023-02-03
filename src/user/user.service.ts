@@ -1,6 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { User } from './user.interface';
-import { from, Observable, ObservedValueOf, of } from 'rxjs';
+import { from, Observable } from 'rxjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { v4 as uuid } from 'uuid';
 import { UpdatePasswordDto } from './dto/put-user.dto';
@@ -9,62 +13,64 @@ import { UpdatePasswordDto } from './dto/put-user.dto';
 export class UserService {
   private users: User[] = [];
 
-  findAll(): Observable<ObservedValueOf<User[]>> {
-    return from(this.users);
+  async findAll(): Promise<User[]> {
+    return this.users;
   }
 
-  findOne(id: string): Observable<User> {
+  async findOne(id: string): Promise<User> {
     const found = this.users.find((user) => user.id === id);
     if (found) {
-      return of(found);
+      return found;
     }
     throw new NotFoundException(`User with ${id} not found!`);
   }
 
-  //TODO: refactor validation
-  async createUser(dto: CreateUserDto): Promise<Observable<User>> {
-    const { login, password } = dto;
-    const user = this.users.find((user) => user.login === login);
+  async createUser(dto: CreateUserDto): Promise<User> {
     const currentDate = Date.now();
     const newUser: User = {
       id: uuid(),
-      login,
-      password,
+      ...dto,
       version: 1,
       createdAt: currentDate,
       updatedAt: currentDate,
     };
-    this.users = [...this.users, newUser];
-    return of(newUser);
+    this.users.push(newUser);
+    return newUser;
   }
 
   async addUser(user: User): Promise<void> {
     this.users.push(user);
   }
 
-  async updateUser(
-    id: string,
-    updatePasswordDto: UpdatePasswordDto,
-  ): Promise<Observable<ObservedValueOf<User[]>>> {
+  async updateUser(id: string, dto: UpdatePasswordDto): Promise<User> {
     const user = await this.findOne(id);
+
     if (!user) {
-      throw new NotFoundException(`User with ID=${id} not found`);
+      throw new NotFoundException(`User with ${id} not found!`);
     }
-    this.users = this.users.map((user) => {
-      if (id === user.id) {
-        user.password = updatePasswordDto.newPassword;
-        user.updatedAt = Date.now();
-      }
-      return user;
-    });
-    return from(user);
+
+    if (user.password !== dto.oldPassword) {
+      throw new ForbiddenException('user not unauthorized');
+    }
+
+    user.password = dto.newPassword;
+    user.updatedAt = Date.now();
+    user.version++;
+
+    return user;
   }
 
   save(data: User): Observable<User> {
-    //  const post = { ...data, id: this.posts.length + 1, createdAt: new Date() };
     this.users = [...this.users, data];
     return from(this.users);
   }
 
-  // async saveUse(idx: string, data: any) {}
+  async deleteUser(id: string) {
+    const idx = this.users.findIndex((user) => user.id === id);
+    if (idx === -1) {
+      throw new NotFoundException(`User with ${id} not found!`);
+    }
+
+    this.users.splice(idx, 1);
+  }
 }
