@@ -56,7 +56,9 @@ export class AlbumService {
     if (idx === -1) {
       throw new NotFoundException(`Album with ${id} not found!`);
     }
-    //TODO: update album dependence
+    Database.tracks.map((track) => {
+      if (track.albumId === id) track.albumId = null;
+    });
 
     this.albums.splice(idx, 1);
   }
