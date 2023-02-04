@@ -32,8 +32,8 @@ export class UserController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
-    const _user = await this.userService.createUser(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<User> {
+    const _user = await this.userService.create(createUserDto);
     const user = { ..._user };
     delete user.password;
     return user;

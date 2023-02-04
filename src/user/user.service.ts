@@ -25,7 +25,7 @@ export class UserService {
     throw new NotFoundException(`User with ${id} not found!`);
   }
 
-  async createUser(dto: CreateUserDto): Promise<User> {
+  async create(dto: CreateUserDto): Promise<User> {
     const currentDate = Date.now();
     const newUser: User = {
       id: uuid(),
