@@ -1,6 +1,7 @@
 const Database = {
   users: [],
   albums: [],
+  artists: [],
   tracks: [],
   favorites: {
     artists: [],
