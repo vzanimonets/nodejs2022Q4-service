@@ -8,10 +8,11 @@ import { from, Observable } from 'rxjs';
 import { CreateUserDto } from './dto/create-user.dto';
 import { v4 as uuid } from 'uuid';
 import { UpdatePasswordDto } from './dto/put-user.dto';
+import { Database } from '../db/database';
 
 @Injectable()
 export class UserService {
-  private users: User[] = [];
+  private users: User[] = Database.users;
 
   async findAll(): Promise<User[]> {
     return this.users;

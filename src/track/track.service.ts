@@ -3,10 +3,11 @@ import { Track } from './track.interface';
 import { v4 as uuid } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/put-track.dto';
+import { Database } from '../db/database';
 
 @Injectable()
 export class TrackService {
-  private tracks: Track[] = [];
+  private tracks: Track[] = Database.tracks;
 
   async findAll(): Promise<Track[]> {
     return this.tracks;
