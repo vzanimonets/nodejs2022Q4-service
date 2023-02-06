@@ -27,7 +27,6 @@ export class AlbumService {
       ...dto,
     };
     Database.albums.push(newAlbum);
-    console.log(newAlbum.id);
     return newAlbum;
   }
 
