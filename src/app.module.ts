@@ -10,9 +10,15 @@ import { AlbumController } from './album/album.controller';
 import { FavoritesController } from './favorites/favorites.controller';
 import { AlbumService } from './album/album.service';
 import { FavoritesService } from './favorites/favorites.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule],
+  imports: [
+    UserModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
+  ],
   controllers: [
     AppController,
     ArtistController,
