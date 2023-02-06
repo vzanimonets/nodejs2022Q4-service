@@ -10,6 +10,11 @@
 ```
 git clone {repository URL}
 ```
+## Switch branch
+
+```
+git checkout development
+```
 
 ## Installing NPM modules
 
@@ -70,3 +75,24 @@ npm run format
 Press <kbd>F5</kbd> to debug.
 
 For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+
+###Creating PostService
+
+Following the Nestjs coding style, first of all, let’s generate a module named post:
+
+````bash
+ nest g mo post
+````
+
+Then generate a Post service and interface respectively.
+
+````bash
+nest g s post
+nest g interface post
+````
+
+Generate a controller using nest command:
+
+```bash
+nest g co post
+```
