@@ -13,6 +13,7 @@ import {
 import { ArtistService } from './artist.service';
 import { Artist } from './artist.interface';
 import { UpdateArtistDto } from './dto/put-artist.dto';
+import { CreateArtistDto } from './dto/create-artist.dto';
 
 @Controller('artist')
 export class ArtistController {
@@ -31,7 +32,7 @@ export class ArtistController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createArtist(@Body() artist: Artist): Promise<Artist> {
+  async createArtist(@Body() artist: CreateArtistDto): Promise<Artist> {
     return await this.artistService.create(artist);
   }
 
