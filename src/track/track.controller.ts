@@ -13,6 +13,7 @@ import {
 import { TrackService } from './track.service';
 import { Track } from './track.interface';
 import { UpdateTrackDto } from './dto/put-track.dto';
+import { CreateTrackDto } from './dto/create-track.dto';
 
 @Controller('track')
 export class TrackController {
@@ -31,7 +32,7 @@ export class TrackController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createTrack(@Body() track: Track): Promise<Track> {
+  async createTrack(@Body() track: CreateTrackDto): Promise<Track> {
     return await this.trackService.create(track);
   }
 
