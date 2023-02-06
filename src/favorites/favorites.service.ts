@@ -65,11 +65,10 @@ export class FavoritesService {
     const idx = Database.albums.findIndex((track) => track.id === id);
 
     if (idx === -1) {
-      throw new NotFoundException("Album id doesn't exist");
+      throw new UnprocessableEntityException("Album id doesn't exist");
     }
     Database.favorites.albums.push(id);
     return Database.albums.find((_id) => _id === id);
-    // if (!exist)
   }
   async addArtist(id: string): Promise<void> {
     const idx = Database.artists.findIndex((track) => track.id === id);

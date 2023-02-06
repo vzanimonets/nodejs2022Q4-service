@@ -14,9 +14,9 @@ export class AlbumService {
   }
 
   async findOne(id: string): Promise<Album> {
-    const found = this.albums.find((track) => track.id === id);
-    if (found) {
-      return found;
+    const idx = Database.albums.findIndex((album) => album.id === id);
+    if (idx !== -1) {
+      return this.albums[idx];
     }
     throw new NotFoundException(`Album with ${id} not found!`);
   }
@@ -26,7 +26,8 @@ export class AlbumService {
       id: uuid(),
       ...dto,
     };
-    this.albums.push(newAlbum);
+    Database.albums.push(newAlbum);
+    console.log(newAlbum.id);
     return newAlbum;
   }
 
