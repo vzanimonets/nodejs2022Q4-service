@@ -13,6 +13,7 @@ import {
 import { AlbumService } from './album.service';
 import { Album } from './album.interface';
 import { UpdateAlbumDto } from './dto/put-album.dto';
+import { CreateAlbumDto } from './dto/create-album.dto';
 
 @Controller('album')
 export class AlbumController {
@@ -31,7 +32,7 @@ export class AlbumController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createAlbum(@Body() album: Album): Promise<Album> {
+  async createAlbum(@Body() album: CreateAlbumDto): Promise<Album> {
     return await this.albumService.create(album);
   }
 

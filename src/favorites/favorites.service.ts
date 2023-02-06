@@ -65,7 +65,7 @@ export class FavoritesService {
     const idx = Database.albums.findIndex((track) => track.id === id);
 
     if (idx === -1) {
-      throw new NotFoundException("Track id doesn't exist");
+      throw new NotFoundException("Album id doesn't exist");
     }
     Database.favorites.albums.push(id);
     return Database.albums.find((_id) => _id === id);
