@@ -10,7 +10,8 @@ import { AlbumController } from './album/album.controller';
 import { FavoritesController } from './favorites/favorites.controller';
 import { AlbumService } from './album/album.service';
 import { FavoritesService } from './favorites/favorites.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
   imports: [
@@ -18,7 +19,26 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => {
+        return {
+          type: 'postgres',
+          database: config.get<string>('TYPEORM_DB'),
+          username: config.get<string>('TYPEORM_USERNAME'),
+          password: config.get<string>('TYPEORM_PASSWORD'),
+          host: config.get<string>('TYPEORM_DB_HOST'),
+          port: config.get<number>('TYPEORM_PORT'),
+          entities: [__dirname + 'dist/**/*.entity{.ts,.js}'],
+          synchronize: true,
+          autoLoadEntities: true,
+          logging: true,
+        };
+      },
+    }),
   ],
+
   controllers: [
     AppController,
     ArtistController,
