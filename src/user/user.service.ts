@@ -54,7 +54,7 @@ export class UserService {
   }
 
   async deleteUser(id: string) {
-    const found = this.userRepository.findOneBy({ id });
+    const found = await this.userRepository.findOneBy({ id });
     if (found) {
       await this.userRepository.delete(id);
       return;
