@@ -1,25 +1,24 @@
-import {
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
-import { Artist } from './artist.interface';
-import { Database } from '../db/database';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Artist } from '../entities/artist.entity';
 import { CreateArtistDto } from './dto/create-artist.dto';
-import { v4 as uuid } from 'uuid';
 import { UpdateArtistDto } from './dto/put-artist.dto';
-import { from, Observable } from 'rxjs';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
-  private artists: Artist[] = Database.artists;
+  constructor(
+    @InjectRepository(Artist)
+    private artistsRepository: Repository<Artist>,
+  ) {}
 
   async findAll(): Promise<Artist[]> {
-    return this.artists;
+    const artists = await this.artistsRepository.find();
+    return artists;
   }
 
   async findOne(id: string): Promise<Artist> {
-    const found = this.artists.find((artist) => artist.id === id);
+    const found = await this.artistsRepository.findOneBy({ id });
     if (found) {
       return found;
     }
@@ -27,11 +26,7 @@ export class ArtistService {
   }
 
   async create(dto: CreateArtistDto): Promise<Artist> {
-    const newArtist: Artist = {
-      id: uuid(),
-      ...dto,
-    };
-    this.artists.push(newArtist);
+    const newArtist = await this.artistsRepository.save(dto);
     return newArtist;
   }
 
@@ -45,31 +40,16 @@ export class ArtistService {
       ..._artist,
       ...dto,
     };
-    // if (artist.password !== dto.oldPassword) {
-    //   throw new ForbiddenException('artist not unauthorized');
-    // }
-    //
-    // artist.password = dto.newPassword;
-    // artist.updatedAt = Date.now();
-    // artist.version++;
-    Database.artists.push(artist);
+    await this.artistsRepository.update(id, artist);
     return artist;
   }
 
-  save(data: Artist): Observable<Artist> {
-    this.artists = [...this.artists, data];
-    return from(this.artists);
-  }
-
   async delete(id: string) {
-    const idx = this.artists.findIndex((artist) => artist.id === id);
-    if (idx === -1) {
+    const found = await this.artistsRepository.findOneBy({ id });
+
+    if (!found) {
       throw new NotFoundException(`Artist with ${id} not found!`);
     }
-    Database.tracks.map((track) => {
-      if (track.artistId === id) track.artistId = null;
-    });
-
-    this.artists.splice(idx, 1);
+    await this.artistsRepository.delete(id);
   }
 }

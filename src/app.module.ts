@@ -3,19 +3,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TrackModule } from './track/track.module';
-import { ArtistService } from './artist/artist.service';
-import { ArtistController } from './artist/artist.controller';
 import { FavoritesController } from './favorites/favorites.controller';
 import { FavoritesService } from './favorites/favorites.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AlbumModule } from './album/album.module';
+import { ArtistModule } from './artist/artist.module';
 
 @Module({
   imports: [
     UserModule,
     TrackModule,
     AlbumModule,
+    ArtistModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
@@ -39,7 +39,7 @@ import { AlbumModule } from './album/album.module';
     }),
   ],
 
-  controllers: [AppController, ArtistController, FavoritesController],
-  providers: [AppService, ArtistService, FavoritesService],
+  controllers: [AppController, FavoritesController],
+  providers: [AppService, FavoritesService],
 })
 export class AppModule {}
