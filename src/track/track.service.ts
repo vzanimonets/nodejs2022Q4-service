@@ -1,20 +1,25 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Track } from './track.interface';
+import { Track } from '../entities/track.entity';
 import { v4 as uuid } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/put-track.dto';
-import { Database } from '../db/database';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
-  private tracks: Track[] = Database.tracks;
+  constructor(
+    @InjectRepository(Track)
+    private trackRepository: Repository<Track>,
+  ) {}
 
-  async findAll(): Promise<Track[]> {
-    return this.tracks;
+  async findAll() {
+    const tracks = await this.trackRepository.find();
+    return tracks;
   }
 
   async findOne(id: string): Promise<Track> {
-    const found = this.tracks.find((track) => track.id === id);
+    const found = await this.trackRepository.findOneBy({ id });
     if (found) {
       return found;
     }
@@ -22,12 +27,9 @@ export class TrackService {
   }
 
   async create(dto: CreateTrackDto): Promise<Track> {
-    const newTrack: Track = {
-      id: uuid(),
-      ...dto,
-    };
-    this.tracks.push(newTrack);
-    return newTrack;
+    const newUser = this.trackRepository.create(dto);
+    await this.trackRepository.save(newUser);
+    return newUser;
   }
 
   async update(id: string, dto: UpdateTrackDto): Promise<Track> {
@@ -40,16 +42,16 @@ export class TrackService {
       ..._track,
       ...dto,
     };
-    this.tracks.push(track);
+    await this.trackRepository.update(id, track);
     return track;
   }
 
   async delete(id: string) {
-    const idx = this.tracks.findIndex((track) => track.id === id);
-    if (idx === -1) {
+    const found = await this.trackRepository.findOneBy({ id });
+    if (!found) {
       throw new NotFoundException(`Track with ${id} not found!`);
     }
 
-    this.tracks.splice(idx, 1);
+    await this.trackRepository.delete(id);
   }
 }

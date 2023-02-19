@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
+import { TrackModule } from './track/track.module';
 import { ArtistService } from './artist/artist.service';
 import { TrackService } from './track/track.service';
 import { ArtistController } from './artist/artist.controller';
@@ -16,6 +17,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
   imports: [
     UserModule,
+    TrackModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
@@ -42,16 +44,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   controllers: [
     AppController,
     ArtistController,
-    TrackController,
     AlbumController,
     FavoritesController,
   ],
-  providers: [
-    AppService,
-    ArtistService,
-    TrackService,
-    AlbumService,
-    FavoritesService,
-  ],
+  providers: [AppService, ArtistService, AlbumService, FavoritesService],
 })
 export class AppModule {}
