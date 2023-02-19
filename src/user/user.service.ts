@@ -57,6 +57,7 @@ export class UserService {
     const found = this.userRepository.findOneBy({ id });
     if (found) {
       await this.userRepository.delete(id);
+      return;
     }
 
     throw new NotFoundException(`User with ${id} not found!`);
