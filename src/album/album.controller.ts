@@ -11,7 +11,7 @@ import {
   Put,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
-import { Album } from './album.interface';
+import { Album } from '../entities/album.entity';
 import { UpdateAlbumDto } from './dto/put-album.dto';
 import { CreateAlbumDto } from './dto/create-album.dto';
 
