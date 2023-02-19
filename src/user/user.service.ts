@@ -47,8 +47,8 @@ export class UserService {
     }
 
     user.password = dto.newPassword;
-    user.updatedAt = Date.now();
-    user.version++;
+    // user.updatedAt = Date.now();
+    // user.version++;
     const savedUser = await this.userRepository.save(user);
     return savedUser.toResponse();
   }
