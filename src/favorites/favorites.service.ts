@@ -1,87 +1,113 @@
-import {
-  Injectable,
-  NotFoundException,
-  UnprocessableEntityException,
-} from '@nestjs/common';
-import { Database } from '../db/database';
-import { Favorites } from './favorites.interface';
-import { Album } from '../album/album.interface';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import { Favorites } from '../entities/favorites.entity';
+import { Favorites as FavoritesResponse } from './favorites.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ArtistService } from '../artist/artist.service';
+import { AlbumService } from '../album/album.service';
+import { TrackService } from '../track/track.service';
+import { Album } from '../entities/album.entity';
+import { Artist } from '../entities/artist.entity';
+import { Track } from '../entities/track.entity';
+import { OnEvent } from '@nestjs/event-emitter';
 
 @Injectable()
 export class FavoritesService {
-  private favorites: Favorites = Database.favorites;
+  constructor(
+    @InjectRepository(Favorites)
+    private readonly favoritesRepository: Repository<Favorites>,
+    private readonly artistService: ArtistService,
+    private readonly albumService: AlbumService,
+    private readonly trackService: TrackService,
+  ) {}
 
-  async get(): Promise<Favorites> {
-    const response = <Favorites>{};
-    Object.entries(this.favorites).map(([key, value]) => {
-      response[key] = value;
+  async get(): Promise<FavoritesResponse> {
+    const allFavorites = await this.favoritesRepository.find();
+    const ids = {
+      artistIds: [],
+      albumIds: [],
+      trackIds: [],
+    };
+    allFavorites.forEach((fav) => {
+      if (fav.type === 'artist') {
+        ids.artistIds.push(fav.typeId);
+      }
+      if (fav.type === 'album') {
+        ids.albumIds.push(fav.typeId);
+      }
+      if (fav.type === 'track') {
+        ids.trackIds.push(fav.typeId);
+      }
     });
-    return response;
+    const artists = await this.artistService.findByIds(ids.artistIds);
+    const albums = await this.albumService.findByIds(ids.albumIds);
+    const tracks = await this.trackService.findByIds(ids.trackIds);
+
+    return { artists, albums, tracks };
   }
 
-  async addTrack(id: string): Promise<void> {
-    const idx = Database.tracks.findIndex((track) => track.id === id);
-
-    if (idx === -1) {
-      throw new NotFoundException("Track id doesn't exist");
+  async addFavorite(type: string, id: string): Promise<Artist | Album | Track> {
+    switch (type) {
+      case 'artist':
+        const artist = (await this.artistService.findAll()).find(
+          (artist) => artist.id === id,
+        );
+        if (!artist) throw new UnprocessableEntityException('Artist not found');
+        await this.favoritesRepository.save({
+          type: 'artist',
+          typeId: id,
+        });
+        return this.artistService.findOne(id);
+      case 'album':
+        const album = (await this.albumService.findAll()).find(
+          (album) => album.id === id,
+        );
+        if (!album) throw new UnprocessableEntityException('Album not found');
+        await this.favoritesRepository.save({
+          type: 'album',
+          typeId: id,
+        });
+        return this.albumService.findOne(id);
+      case 'track':
+        const track = (await this.trackService.findAll()).find(
+          (track) => track.id === id,
+        );
+        if (!track) throw new UnprocessableEntityException('Track not found');
+        await this.favoritesRepository.save({
+          type: 'track',
+          typeId: id,
+        });
+        return this.trackService.findOne(id);
+      default:
+        throw new Error('Unknown type');
     }
-    const exist = this.favorites.tracks.find((_id) => _id === id);
-    if (!exist) this.favorites.tracks.push(id);
   }
 
-  async deleteTrack(id: string): Promise<void> {
-    const idx = Database.tracks.findIndex((track) => track.id === id);
-    if (idx === -1) {
-      throw new UnprocessableEntityException("Track id doesn't exist");
+  async deleteFavorite(type: string, id: string) {
+    switch (type) {
+      case 'artist':
+        return this.favoritesRepository.delete({ type: 'artist', typeId: id });
+      case 'album':
+        return this.favoritesRepository.delete({ type: 'album', typeId: id });
+      case 'track':
+        return this.favoritesRepository.delete({ type: 'track', typeId: id });
+      default:
+        throw new Error('Unknown type');
     }
-    // this.favorites.tracks.map((track) => {
-    //   if (track.albumId === id) track.albumId = null;
-    // });
-
-    this.favorites.tracks.splice(idx, 1);
-  }
-  async deleteAlbum(id: string): Promise<void> {
-    const idx = this.favorites.albums.findIndex((fid) => fid === id);
-    if (idx === -1) {
-      throw new UnprocessableEntityException("Track id doesn't exist");
-    }
-    this.favorites.tracks.filter((fid) => fid !== id);
-
-    this.favorites.albums.splice(idx, 1);
-  }
-  async deleteArtist(id: string): Promise<void> {
-    const idx = Database.artists.findIndex((track) => track.id === id);
-    if (idx === -1) {
-      throw new UnprocessableEntityException("Track id doesn't exist");
-    }
-    // this.favorites.tracks.map((track) => {
-    //   if (track.albumId === id) track.albumId = null;
-    // });
-
-    this.favorites.artists.splice(idx, 1);
   }
 
-  async addAlbum(id: string): Promise<Album> {
-    const idx = Database.albums.findIndex((track) => track.id === id);
-
-    if (idx === -1) {
-      throw new UnprocessableEntityException("Album id doesn't exist");
-    }
-    Database.favorites.albums.push(id);
-    return Database.albums.find((_id) => _id === id);
+  @OnEvent('delete.track')
+  async deleteTrack(id: string) {
+    await this.favoritesRepository.delete({ type: 'track', typeId: id });
   }
-  async addArtist(id: string): Promise<void> {
-    const idx = Database.artists.findIndex((track) => track.id === id);
 
-    if (idx === -1) {
-      throw new NotFoundException("Track id doesn't exist");
-    }
-    const exist = this.favorites.artists.find((_id) => _id === id);
-    // if (!exist)
-    Database.favorites.artists.push(id);
-    const artist = Database.artists.find((artist) => {
-      return artist.id === id;
-    });
-    return artist;
+  @OnEvent('delete.artist')
+  async deleteArtist(id: string) {
+    await this.favoritesRepository.delete({ type: 'artist', typeId: id });
+  }
+
+  @OnEvent('delete.album')
+  async deleteAlbum(id: string) {
+    await this.favoritesRepository.delete({ type: 'album', typeId: id });
   }
 }

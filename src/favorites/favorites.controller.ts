@@ -10,6 +10,9 @@ import {
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { Favorites } from './favorites.interface';
+import { Artist } from '../entities/artist.entity';
+import { Album } from '../entities/album.entity';
+import { Track } from '../entities/track.entity';
 
 @Controller('favs')
 export class FavoritesController {
@@ -21,49 +24,21 @@ export class FavoritesController {
     return this.favoritesService.get();
   }
 
-  @Post('track/:id')
+  @Post('/:type/:id')
   @HttpCode(HttpStatus.CREATED)
-  async addTrack(@Param('id', new ParseUUIDPipe()) id: string) {
-    await this.favoritesService.addTrack(id);
+  addFavorite(
+    @Param('type') type: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<Artist | Album | Track> {
+    return this.favoritesService.addFavorite(type, id);
   }
 
-  @Delete('track/:id')
+  @Delete('/:type/:id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  deleteTrack(@Param('id', new ParseUUIDPipe()) id): Promise<void> {
-    return this.favoritesService.deleteTrack(id);
+  async deleteFavorite(
+    @Param('type') type: string,
+    @Param('id', new ParseUUIDPipe()) id: string,
+  ): Promise<void> {
+    await this.favoritesService.deleteFavorite(type, id);
   }
-
-  @Post('album/:id')
-  async findOneAlbum(@Param('id', new ParseUUIDPipe()) id: string) {
-    const album = await this.favoritesService.addAlbum(id);
-    return album;
-  }
-
-  @Delete('album/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteAlbum(@Param('id', new ParseUUIDPipe()) id): Promise<void> {
-    await this.favoritesService.deleteAlbum(id);
-  }
-
-  @Post('artist/:id')
-  async findOneArtist(@Param('id', new ParseUUIDPipe()) id: string) {
-    return await this.favoritesService.addArtist(id);
-  }
-
-  @Delete('artist/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async deleteArtist(@Param('id', new ParseUUIDPipe()) id): Promise<void> {
-    await this.favoritesService.deleteArtist(id);
-  }
-  //
-  // @Post('artist/:id')
-  // async findOneArtist(@Param('id', new ParseUUIDPipe()) id: string) {
-  //   return await this.favoritesService.findOne(id);
-  // }
-  //
-  // @Delete('artist/:id')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // deleteArtist(@Param('id', new ParseUUIDPipe()) id): Promise<void> {
-  //   //return this.favoritesService.delete(id);
-  // }
 }
