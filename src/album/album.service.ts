@@ -3,7 +3,7 @@ import { Album } from '../entities/album.entity';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/put-album.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -56,5 +56,9 @@ export class AlbumService {
     this.eventEmitter.emit('delete.album', id);
 
     await this.albumRepository.delete(id);
+  }
+
+  async findByIds(ids: string[]) {
+    return this.albumRepository.find({ where: { id: In(ids) } });
   }
 }

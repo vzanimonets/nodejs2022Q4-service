@@ -3,7 +3,7 @@ import { Artist } from '../entities/artist.entity';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/put-artist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
@@ -55,5 +55,9 @@ export class ArtistService {
 
     this.eventEmitter.emit('delete.artist', id);
     await this.artistsRepository.delete(id);
+  }
+
+  async findByIds(ids: string[]): Promise<Artist[]> {
+    return this.artistsRepository.find({ where: { id: In(ids) } });
   }
 }

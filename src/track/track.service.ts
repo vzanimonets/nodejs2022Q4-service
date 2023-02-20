@@ -1,10 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Track } from '../entities/track.entity';
-import { v4 as uuid } from 'uuid';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/put-track.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 @Injectable()
 export class TrackService {
@@ -53,5 +52,9 @@ export class TrackService {
     }
 
     await this.trackRepository.delete(id);
+  }
+
+  async findByIds(ids: string[]): Promise<Track[]> {
+    return this.trackRepository.find({ where: { id: In(ids) } });
   }
 }
