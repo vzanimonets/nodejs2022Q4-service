@@ -1,17 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Album } from '../entities/album.entity';
 import { CreateAlbumDto } from './dto/create-album.dto';
-import { v4 as uuid } from 'uuid';
 import { UpdateAlbumDto } from './dto/put-album.dto';
-import { Database } from '../db/database';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class AlbumService {
   constructor(
     @InjectRepository(Album)
     private albumRepository: Repository<Album>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(): Promise<Album[]> {
@@ -28,12 +28,7 @@ export class AlbumService {
   }
 
   async create(dto: CreateAlbumDto): Promise<Album> {
-    const newAlbum: Album = {
-      id: uuid(),
-      ...dto,
-    };
-    await this.albumRepository.save(newAlbum);
-    return newAlbum;
+    return this.albumRepository.save(dto);
   }
 
   async update(id: string, dto: UpdateAlbumDto): Promise<Album> {
@@ -42,10 +37,6 @@ export class AlbumService {
     if (!_album) {
       throw new NotFoundException(`Album with ${id} not found!`);
     }
-
-    Database.tracks.map((track) => {
-      if (track.albumId === id) track.albumId = album.id;
-    });
 
     const album = {
       ..._album,
@@ -61,6 +52,9 @@ export class AlbumService {
     if (!found) {
       throw new NotFoundException(`Album with ${id} not found!`);
     }
+
+    this.eventEmitter.emit('delete.album', id);
+
     await this.albumRepository.delete(id);
   }
 }

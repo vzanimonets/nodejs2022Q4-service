@@ -4,12 +4,14 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/put-artist.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class ArtistService {
   constructor(
     @InjectRepository(Artist)
     private artistsRepository: Repository<Artist>,
+    private eventEmitter: EventEmitter2,
   ) {}
 
   async findAll(): Promise<Artist[]> {
@@ -50,6 +52,8 @@ export class ArtistService {
     if (!found) {
       throw new NotFoundException(`Artist with ${id} not found!`);
     }
+
+    this.eventEmitter.emit('delete.artist', id);
     await this.artistsRepository.delete(id);
   }
 }
