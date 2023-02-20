@@ -20,6 +20,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "docker": "docker-compose up",
+    "scan:service": "docker scan nest-service",
+    "scan:postgres": "docker scan postgres",
     "typeorm": "npm run build && npx typeorm -d ./dist/db/data-source.js",
     "migration:generate": "npm run typeorm migration:generate ./src/migrations/initMigrations",
     "migration:create": "npm run typeorm migration:create ./src/migrations/emptyMigrations",

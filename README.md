@@ -8,12 +8,12 @@
 ## Downloading
 
 ```
-git clone {repository URL}
+git clone {https://github.com/vzanimonets/nodejs2022Q4-service.git}
 ```
 ## Switch branch
 
 ```
-git checkout development
+git checkout task-7
 ```
 
 ## Installing NPM modules
@@ -25,7 +25,7 @@ npm install
 ## Running application
 
 ```
-npm start
+npm run docker
 ```
 
 After starting the app on port (4000 as default) you can open
@@ -70,29 +70,8 @@ npm run lint
 npm run format
 ```
 
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
-
-###Creating PostService
-
-Following the Nestjs coding style, first of all, let’s generate a module named post:
-
-````bash
- nest g mo post
-````
-
-Then generate a Post service and interface respectively.
-
-````bash
-nest g s post
-nest g interface post
-````
-
-Generate a controller using nest command:
-
-```bash
-nest g co post
+Scan docker images
+```
+npm run scan:service
+npm run scan:postgres
 ```
