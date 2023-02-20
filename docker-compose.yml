@@ -28,9 +28,9 @@ services:
     build: ./database/
     env_file:
       - .env
-#    volumes:
-#      - ./typeorm/pgdata:/var/lib/postgresql/data
-#      - ./typeorm/pg-logs:/var/lib/postgresql/logs
+    volumes:
+      - ./typeorm/pgdata:/var/lib/postgresql/data
+      - ./typeorm/pg-logs:/var/lib/postgresql/logs
     ports:
       - ${TYPEORM_PORT}:${TYPEORM_PORT}
 
