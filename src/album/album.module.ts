@@ -8,5 +8,6 @@ import { AlbumController } from './album.controller';
   imports: [TypeOrmModule.forFeature([Album])],
   providers: [AlbumService],
   controllers: [AlbumController],
+  exports: [AlbumService],
 })
 export class AlbumModule {}

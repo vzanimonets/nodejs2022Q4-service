@@ -8,5 +8,6 @@ import { ArtistController } from './artist.controller';
   imports: [TypeOrmModule.forFeature([Artist])],
   providers: [ArtistService],
   controllers: [ArtistController],
+  exports: [ArtistService],
 })
 export class ArtistModule {}
