@@ -3,12 +3,12 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TrackModule } from './track/track.module';
-import { FavoritesController } from './favorites/favorites.controller';
-import { FavoritesService } from './favorites/favorites.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AlbumModule } from './album/album.module';
 import { ArtistModule } from './artist/artist.module';
+import { FavoritesModule } from './favorites/favorites.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -16,9 +16,11 @@ import { ArtistModule } from './artist/artist.module';
     TrackModule,
     AlbumModule,
     ArtistModule,
+    FavoritesModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
+    EventEmitterModule.forRoot(),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -39,7 +41,7 @@ import { ArtistModule } from './artist/artist.module';
     }),
   ],
 
-  controllers: [AppController, FavoritesController],
-  providers: [AppService, FavoritesService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
